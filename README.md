@@ -1,4 +1,4 @@
-# Integration Tests - Multi-Service Sample
+# Integration Tests - Multi-Service Sample (Maven)
 
 Three microservices with comprehensive integration tests covering all service chain combinations.
 
@@ -17,25 +17,27 @@ Three microservices with comprehensive integration tests covering all service ch
 
 ## 📋 Manual Commands
 
-### Run Tests (services must be running)
+### Build All Services
 ```bash
-# Clean build with fresh test execution
-./gradlew clean test --rerun-tasks
-
-# Or shorter (uses cache if available)
-./gradlew clean test
+mvn clean package -DskipTests
 ```
 
 ### Start Services (3 terminals)
 ```bash
 # Terminal 1 - Shipping (port 8083)
-./gradlew :shipping-service:run
+java -jar shipping-service/target/shipping-service-1.0-SNAPSHOT.jar
 
 # Terminal 2 - Inventory (port 8082)
-./gradlew :inventory-service:bootRun
+java -jar inventory-service/target/inventory-service-1.0-SNAPSHOT.jar
 
 # Terminal 3 - Order (port 8081)
-./gradlew :order-service:bootRun
+java -jar order-service/target/order-service-1.0-SNAPSHOT.jar
+```
+
+### Run Tests (services must be running)
+```bash
+cd integration-tests
+mvn test
 ```
 
 ### Stop Services
@@ -75,7 +77,7 @@ Failed: 0
 Skipped: 0
 ============================================================
 
-BUILD SUCCESSFUL in 2s
+BUILD SUCCESS
 ```
 
 ---
@@ -151,14 +153,15 @@ GET /eta/{sku}
 ## 📂 Project Structure
 
 ```
-integration-tests/
+integration-tests-maven/
 ├── order-service/          Spring Boot 3 (A)
 ├── inventory-service/      Spring Boot 2 (B)
 ├── shipping-service/       Javalin (C)
 ├── integration-tests/      Test suite
+├── pom.xml                Parent POM
 ├── run-it.sh              Automated runner
-├── README.md              This file
-└── QUICKSTART.md          Quick reference
+├── docker-compose.yml     Docker orchestration
+└── README.md              This file
 ```
 
 ---
@@ -166,43 +169,76 @@ integration-tests/
 ## 🎯 Run Specific Tests
 
 ```bash
-# All matrix tests
-./gradlew test --tests ComprehensiveMatrixIT
+cd integration-tests
 
-# Specific test
-./gradlew test --tests "ComprehensiveMatrixIT.test6*"
+# All matrix tests
+mvn test -Dtest=ComprehensiveMatrixIT
 
 # Happy path only
-./gradlew test --tests HappyPathIT
+mvn test -Dtest=HappyPathIT
 
 # Concurrent tests
-./gradlew test --tests ConcurrentTestsIT
+mvn test -Dtest=ConcurrentTestsIT
+
+# Multiple test classes
+mvn test -Dtest=HappyPathIT,ConcurrentTestsIT
 ```
 
 ---
 
-## 📖 View HTML Report
+## 📖 View Test Reports
 
 ```bash
-open integration-tests/build/reports/tests/test/index.html
+# Maven surefire reports
+open integration-tests/target/surefire-reports/index.html
 ```
 
 ---
 
 ## 🛠️ Requirements
 
-- Java 17+
-- Gradle 8.5+ (wrapper included - use `./gradlew`)
+- **Java 17+**
+- **Maven 3.6+** (tested with 3.9.12)
+
+### Installation
+
+```bash
+# macOS
+brew install maven
+
+# Or use sdkman
+sdk install maven
+sdk install java 17.0.7-tem
+```
+
+---
+
+## 🐳 Docker Support
+
+```bash
+# Build images
+docker-compose build
+
+# Start all services
+docker-compose up -d
+
+# Run tests against Docker services
+cd integration-tests
+mvn test
+
+# Stop services
+docker-compose down
+```
 
 ---
 
 ## 💡 Design Decisions
 
 ✅ **In-memory data** - No external databases, hermetic tests  
-✅ **Process-based tests** - Tests run as separate JVM via HTTP  
+✅ **Process-based tests** - Tests run as separate JVMs via HTTP  
 ✅ **Heterogeneous stack** - Multiple frameworks & HTTP clients  
-✅ **Real-time output** - See each test as it executes  
-✅ **Clean Gradle** - Standard setup, no cache warnings  
+✅ **Maven multi-module** - Standard Maven parent/child structure  
+✅ **Fat JARs** - Spring Boot executable JARs + maven-shade for Javalin  
 
 ---
 
@@ -224,15 +260,40 @@ pkill -f "inventory-service"
 pkill -f "order-service"
 ```
 
-**Using wrong Gradle?**
+**JAR files not building?**
 ```bash
-# Use ./gradlew (with dot-slash), NOT gradle
-./gradlew clean test  ✅
-gradle clean test     ❌
+# Clean build everything
+mvn clean package -DskipTests
+```
+
+**Shipping service ClassNotFoundException?**
+```bash
+# Verify maven-shade-plugin created fat JAR
+ls -lh shipping-service/target/shipping-service-1.0-SNAPSHOT.jar
+# Should be ~5MB, not ~2KB
 ```
 
 ---
 
-## 📚 Additional Documentation
+## 📝 Service Logging
 
-See **[QUICKSTART.md](QUICKSTART.md)** for condensed reference.
+All services include logging to show the HTTP call chain:
+
+```
+>>> [ORDER-SERVICE] Received POST /orders
+    [ORDER->INVENTORY] Calling GET http://localhost:8082/stock/TEST-SKU
+    >>> [INVENTORY-SERVICE] Received GET /stock/TEST-SKU
+        [INVENTORY->SHIPPING] Calling GET http://localhost:8083/eta/TEST-SKU
+            >>> [SHIPPING-SERVICE] Received GET /eta/TEST-SKU
+            <<< [SHIPPING-SERVICE] Returning ETA: 1 days
+        [INVENTORY<-SHIPPING] Received ETA: 1 days
+    <<< [INVENTORY-SERVICE] Returning stock - quantity=20, etaDays=1
+    [ORDER<-INVENTORY] Received stock info - quantity=20, etaDays=1
+<<< [ORDER-SERVICE] Created order - id=..., status=CONFIRMED
+```
+
+---
+
+## 🔗 Related Repositories
+
+- [integration-tests](https://github.com/satyakota04/integration-tests) - Gradle version
