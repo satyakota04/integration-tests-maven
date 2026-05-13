@@ -1,0 +1,6 @@
+server:
+  port: 8081
+
+inventory:
+  service:
+    url: http://localhost:8082

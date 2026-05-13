@@ -1,0 +1,6 @@
+server:
+  port: 8082
+
+shipping:
+  service:
+    url: http://localhost:8083

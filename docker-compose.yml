@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  shipping-service:
+    build:
+      context: .
+      dockerfile: shipping-service/Dockerfile
+    ports:
+      - "8083:8083"
+    environment:
+      - SERVER_PORT=8083
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8083/eta/test"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  inventory-service:
+    build:
+      context: .
+      dockerfile: inventory-service/Dockerfile
+    ports:
+      - "8082:8082"
+    environment:
+      - SHIPPING_SERVICE_URL=http://shipping-service:8083
+    depends_on:
+      shipping-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8082/stock/test"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  order-service:
+    build:
+      context: .
+      dockerfile: order-service/Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      - INVENTORY_SERVICE_URL=http://inventory-service:8082
+    depends_on:
+      inventory-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8081/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
