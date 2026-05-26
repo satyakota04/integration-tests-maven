@@ -3,7 +3,10 @@ package com.harness.sample.it;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.*;
-import org.junit.jupiter.api.*;
+import org.testng.SkipException;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,7 +23,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * 5. A→B (order calls inventory, but B doesn't call C)
  * 6. A→B→C (full chain)
  */
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ComprehensiveMatrixIT {
     private static final String ORDER_SERVICE_URL = System.getProperty("order.service.url", "http://localhost:8081");
     private static final String INVENTORY_SERVICE_URL = System.getProperty("inventory.service.url", "http://localhost:8082");
@@ -29,7 +31,7 @@ public class ComprehensiveMatrixIT {
     private final OkHttpClient client = new OkHttpClient();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @BeforeAll
+    @BeforeClass
     public static void printMatrix() {
         System.out.println("\n╔════════════════════════════════════════════════════════════╗");
         System.out.println("║          Service Call Combination Matrix                  ║");
@@ -51,9 +53,7 @@ public class ComprehensiveMatrixIT {
     // Chain: C
     // ========================================================================
 
-    @Test
-    @Order(1)
-    @DisplayName("Test 1: C alone - shipping-service standalone")
+    @Test(priority = 1, description = "Test 1: C alone - shipping-service standalone")
     public void test1_C_alone() throws Exception {
         System.out.println("▶ Test 1: C alone");
 
@@ -82,9 +82,7 @@ public class ComprehensiveMatrixIT {
     // Chain: B (but B normally calls C, so this tests error handling)
     // ========================================================================
 
-    @Test
-    @Order(2)
-    @DisplayName("Test 2: B alone - inventory without shipping (edge case)")
+    @Test(priority = 2, description = "Test 2: B alone - inventory without shipping (edge case)")
     public void test2_B_alone() throws Exception {
         System.out.println("▶ Test 2: B alone (edge case - B normally calls C)");
         System.out.println("  Note: B always calls C in implementation");
@@ -116,9 +114,7 @@ public class ComprehensiveMatrixIT {
     // Chain: B→C
     // ========================================================================
 
-    @Test
-    @Order(3)
-    @DisplayName("Test 3: B→C - inventory calls shipping")
+    @Test(priority = 3, description = "Test 3: B→C - inventory calls shipping")
     public void test3_B_to_C() throws Exception {
         System.out.println("▶ Test 3: B→C");
 
@@ -150,9 +146,7 @@ public class ComprehensiveMatrixIT {
     // Chain: A (GET request, no downstream calls)
     // ========================================================================
 
-    @Test
-    @Order(4)
-    @DisplayName("Test 4: A alone - order GET without downstream calls")
+    @Test(priority = 4, description = "Test 4: A alone - order GET without downstream calls")
     public void test4_A_alone() throws Exception {
         System.out.println("▶ Test 4: A alone");
         System.out.println("  Note: First create order (uses A→B→C), then GET (uses A only)");
@@ -169,8 +163,7 @@ public class ComprehensiveMatrixIT {
             if (!response.isSuccessful()) {
                 System.out.println("  ✗ Cannot create order (downstream unavailable)");
                 System.out.println("  Status: SKIPPED (requires A→B→C first)\n");
-                Assumptions.assumeTrue(false);
-                return;
+                throw new SkipException("Requires A→B→C to create an order first");
             }
             JsonNode json = objectMapper.readTree(response.body().string());
             orderId = json.get("id").asText();
@@ -203,9 +196,7 @@ public class ComprehensiveMatrixIT {
     // Chain: A→B (but B calls C, so this tests A→B→C with C unavailable)
     // ========================================================================
 
-    @Test
-    @Order(5)
-    @DisplayName("Test 5: A→B - order calls inventory (C unavailable edge case)")
+    @Test(priority = 5, description = "Test 5: A→B - order calls inventory (C unavailable edge case)")
     public void test5_A_to_B_without_C() throws Exception {
         System.out.println("▶ Test 5: A→B (edge case - B normally calls C)");
         System.out.println("  Note: In implementation, B always calls C");
@@ -239,9 +230,7 @@ public class ComprehensiveMatrixIT {
     // Chain: A→B→C
     // ========================================================================
 
-    @Test
-    @Order(6)
-    @DisplayName("Test 6: A→B→C - full service chain")
+    @Test(priority = 6, description = "Test 6: A→B→C - full service chain")
     public void test6_A_to_B_to_C_fullChain() throws Exception {
         System.out.println("▶ Test 6: A→B→C (full chain)");
 
@@ -285,9 +274,7 @@ public class ComprehensiveMatrixIT {
     // BONUS: All combinations in parallel
     // ========================================================================
 
-    @Test
-    @Order(7)
-    @DisplayName("Bonus: All valid combinations executed in parallel")
+    @Test(priority = 7, description = "Bonus: All valid combinations executed in parallel")
     public void test7_allCombinationsParallel() throws Exception {
         System.out.println("▶ Bonus Test: All combinations in parallel");
         System.out.println("  Running: C, B→C, A alone, A→B→C simultaneously\n");
@@ -399,7 +386,7 @@ public class ComprehensiveMatrixIT {
         System.out.println("\n  Status: PASSED\n");
     }
 
-    @AfterAll
+    @AfterClass
     public static void printSummary() {
         System.out.println("╔════════════════════════════════════════════════════════════╗");
         System.out.println("║                    Matrix Test Summary                     ║");

@@ -1,0 +1,198 @@
+pipeline:
+  name: paypal repro
+  identifier: paypal_repro
+  tags: {}
+  projectIdentifier: qajt
+  orgIdentifier: default
+  properties:
+    ci:
+      codebase:
+        connectorRef: satyagit
+        build: <+input>
+  stages:
+    - stage:
+        name: CI
+        identifier: CI
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: true
+          caching:
+            enabled: true
+            override: true
+          infrastructure:
+            type: KubernetesDirect
+            spec:
+              connectorRef: deleciplay
+              namespace: harness-delegate-ng
+              automountServiceAccountToken: true
+              nodeSelector: {}
+              os: Linux
+          execution:
+            steps:
+              - step:
+                  type: Run
+                  name: Build
+                  identifier: Build
+                  spec:
+                    connectorRef: dockersatya
+                    image: maven:3.9-eclipse-temurin-17
+                    shell: Sh
+                    command: mvn clean package -DskipTests
+
+              - parallel:
+                  - step:
+                      type: BuildAndPushDockerRegistry
+                      name: Build Shipping Service
+                      identifier: BuildAndPushDockerRegistry_1
+                      spec:
+                        connectorRef: dockersatya
+                        repo: satyakota04/shipping-service
+                        tags:
+                          - "10.0"
+                        caching: true
+                        dockerfile: shipping-service/Dockerfile
+                        context: shipping-service
+
+                  - step:
+                      type: BuildAndPushDockerRegistry
+                      name: Build Inventory Service
+                      identifier: BuildAndPushDockerRegistry_2
+                      spec:
+                        connectorRef: dockersatya
+                        repo: satyakota04/inventory-service
+                        tags:
+                          - "10.0"
+                        caching: true
+                        dockerfile: inventory-service/Dockerfile
+                        context: inventory-service
+
+                  - step:
+                      type: BuildAndPushDockerRegistry
+                      name: Build Order Service
+                      identifier: BuildAndPushDockerRegistry_3
+                      spec:
+                        connectorRef: dockersatya
+                        repo: satyakota04/order-service
+                        tags:
+                          - "10.0"
+                        caching: true
+                        dockerfile: order-service/Dockerfile
+                        context: order-service
+
+              - step:
+                  type: Run
+                  name: Deploy to GKE
+                  identifier: Deploy_to_GKE
+                  spec:
+                    connectorRef: dockersatya
+                    image: bitnami/kubectl:latest
+                    shell: Sh
+                    command: |
+                      #!/bin/sh
+                      set -e
+
+                      echo "==> Installing envsubst..."
+                      apt-get update -qq && apt-get install -y -qq gettext-base
+
+                      echo "==> Creating namespace..."
+                      kubectl apply -f k8s/namespace.yaml || true
+
+                      echo "==> Deploying services..."
+                      export DOCKER_USER=satyakota04
+                      export GIT_SHA="10.0"
+
+                      echo "Using image tag: $GIT_SHA"
+
+                      for manifest in k8s/*.yaml; do
+                        if [ "$manifest" != "k8s/namespace.yaml" ]; then
+                          envsubst < "$manifest" | kubectl apply -f -
+                        fi
+                      done
+
+                      echo "==> Waiting for deployments..."
+                      kubectl rollout status deployment/shipping-service -n integration-tests --timeout=5m
+                      kubectl rollout status deployment/inventory-service -n integration-tests --timeout=5m
+                      kubectl rollout status deployment/order-service -n integration-tests --timeout=5m
+
+                      echo "==> Deployment complete!"
+                      kubectl get pods -n integration-tests
+
+              - step:
+                  type: Run
+                  name: Run Integration Tests
+                  identifier: Run_Integration_Tests
+                  spec:
+                    connectorRef: dockersatya
+                    image: maven:3.9-eclipse-temurin-17
+                    shell: Bash
+                    command: |
+                      #!/bin/bash
+                      set -e
+
+                      echo "==> Installing kubectl and netcat..."
+                      curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+                      chmod +x kubectl && mv kubectl /usr/local/bin/
+                      apt-get update && apt-get install -y netcat-openbsd
+
+                      echo "==> Starting port-forwards..."
+                      kubectl port-forward -n integration-tests svc/order-service 8081:8081 &
+                      PID1=$!
+                      kubectl port-forward -n integration-tests svc/inventory-service 8082:8082 &
+                      PID2=$!
+                      kubectl port-forward -n integration-tests svc/shipping-service 8083:8083 &
+                      PID3=$!
+
+                      echo "==> Waiting for ports to be ready..."
+                      sleep 5
+
+                      for port in 8081 8082 8083; do
+                        for i in {1..10}; do
+                          if nc -z localhost $port 2>/dev/null; then
+                            echo "Port $port is ready"
+                            break
+                          fi
+                          if [ $i -eq 10 ]; then
+                            echo "ERROR: Port $port did not become available"
+                            exit 1
+                          fi
+                          sleep 1
+                        done
+                      done
+
+                      echo "==> Running integration tests..."
+                      mvn test -pl integration-tests
+
+                      echo "==> Stopping port-forwards..."
+                      kill $PID1 $PID2 $PID3 2>/dev/null || true
+
+                      echo "==> Tests completed successfully!"
+                    reports:
+                      type: JUnit
+                      spec:
+                        paths:
+                          - "integration-tests/target/surefire-reports/*.xml"
+                  failureStrategies:
+                    - onFailure:
+                        errors:
+                          - AllErrors
+                        action:
+                          type: MarkAsSuccess
+
+              - step:
+                  type: Run
+                  name: Cleanup GKE Resources
+                  identifier: Cleanup_GKE
+                  spec:
+                    connectorRef: dockersatya
+                    image: bitnami/kubectl:latest
+                    shell: Sh
+                    command: |
+                      #!/bin/sh
+                      echo "==> Tearing down GKE deployments..."
+                      kubectl delete -f k8s/ -n integration-tests --ignore-not-found=true
+                      echo "==> Cleanup complete!"
+                  when:
+                    stageStatus: All
+          sharedPaths:
+            - /var/run

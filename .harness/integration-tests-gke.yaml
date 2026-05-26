@@ -1,0 +1,90 @@
+pipeline:
+  name: Integration Tests on GKE
+  identifier: integration_tests_gke
+  projectIdentifier: <your-project-id>
+  orgIdentifier: <your-org-id>
+  tags: {}
+  properties:
+    ci:
+      codebase:
+        connectorRef: <your-git-connector>
+        repoName: integration-tests-maven
+        build: <+input>
+  stages:
+    - stage:
+        name: Test on GKE
+        identifier: test_on_gke
+        type: CI
+        spec:
+          cloneCodebase: true
+          infrastructure:
+            type: KubernetesDirect
+            spec:
+              connectorRef: <your-k8s-connector>
+              namespace: harness-builds
+              automountServiceAccountToken: true
+          execution:
+            steps:
+              - step:
+                  type: Run
+                  name: Run All-in-One Script
+                  identifier: run_script
+                  spec:
+                    connectorRef: <your-docker-connector>
+                    image: google/cloud-sdk:alpine
+                    shell: Sh
+                    command: |
+                      #!/bin/sh
+                      set -e
+
+                      echo "==> Installing dependencies..."
+                      apk add --no-cache \
+                        openjdk17 \
+                        maven \
+                        docker \
+                        docker-cli-buildx \
+                        netcat-openbsd \
+                        gettext \
+                        bash
+
+                      echo "==> Setting up Docker..."
+                      echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
+
+                      echo "==> Configuring kubectl for GKE..."
+                      gcloud auth activate-service-account --key-file=/tmp/gke-sa-key.json
+                      gcloud container clusters get-credentials <cluster-name> \
+                        --region=<region> \
+                        --project=<project-id>
+
+                      echo "==> Running test-on-gke.sh..."
+                      chmod +x test-on-gke.sh
+                      export DOCKER_USER
+                      ./test-on-gke.sh
+                    envVariables:
+                      DOCKER_USER: <+pipeline.variables.DOCKER_USER>
+                      DOCKER_PASSWORD: <+secrets.getValue("docker_hub_password")>
+                    outputVariables: []
+                    privileged: true
+                    resources:
+                      limits:
+                        memory: 4Gi
+                        cpu: "2"
+                  timeout: 30m
+                  failureStrategies:
+                    - onFailure:
+                        errors:
+                          - AllErrors
+                        action:
+                          type: Abort
+                  when:
+                    stageStatus: Success
+          serviceDependencies: []
+          sharedPaths:
+            - /var/run
+        variables: []
+  variables:
+    - name: DOCKER_USER
+      type: String
+      description: Docker Hub username
+      required: true
+      value: satyakota04

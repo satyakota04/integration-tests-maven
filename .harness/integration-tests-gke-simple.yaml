@@ -1,0 +1,67 @@
+pipeline:
+  name: Integration Tests on GKE (Simple)
+  identifier: integration_tests_gke_simple
+  projectIdentifier: <your-project-id>
+  orgIdentifier: <your-org-id>
+  tags: {}
+  properties:
+    ci:
+      codebase:
+        connectorRef: <your-git-connector>
+        repoName: integration-tests-maven
+        build: <+input>
+  stages:
+    - stage:
+        name: Test on GKE
+        identifier: test_on_gke
+        type: CI
+        spec:
+          cloneCodebase: true
+          infrastructure:
+            type: KubernetesDirect
+            spec:
+              connectorRef: <your-k8s-connector>
+              namespace: harness-builds
+              automountServiceAccountToken: true
+          execution:
+            steps:
+              - step:
+                  type: Run
+                  name: Run test-on-gke.sh
+                  identifier: run_script
+                  spec:
+                    connectorRef: <your-docker-connector>
+                    image: maven:3.9-eclipse-temurin-17
+                    shell: Bash
+                    command: |
+                      #!/bin/bash
+                      set -e
+
+                      # Install kubectl and envsubst
+                      curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+                      chmod +x kubectl && mv kubectl /usr/local/bin/
+                      apt-get update && apt-get install -y gettext-base netcat-openbsd
+
+                      # Docker login
+                      echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
+
+                      # Run the script
+                      chmod +x test-on-gke.sh
+                      export DOCKER_USER
+                      ./test-on-gke.sh
+                    envVariables:
+                      DOCKER_USER: <+pipeline.variables.DOCKER_USER>
+                      DOCKER_PASSWORD: <+secrets.getValue("docker_hub_password")>
+                    privileged: true
+                    resources:
+                      limits:
+                        memory: 4Gi
+                        cpu: "2"
+                  timeout: 30m
+        variables: []
+  variables:
+    - name: DOCKER_USER
+      type: String
+      description: Docker Hub username
+      required: true
+      value: satyakota04

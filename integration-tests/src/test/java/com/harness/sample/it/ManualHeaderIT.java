@@ -1,7 +1,7 @@
 package com.harness.sample.it;
 
 import okhttp3.*;
-import org.junit.jupiter.api.Test;
+import org.testng.annotations.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -3,7 +3,8 @@ package com.harness.sample.it;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.*;
-import org.junit.jupiter.api.*;
+import org.testng.SkipException;
+import org.testng.annotations.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -13,7 +14,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * - Entry point B (inventory-service): B, B→C
  * - Entry point C (shipping-service): C
  */
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ServiceChainCombinationsIT {
     private static final String ORDER_SERVICE_URL = System.getProperty("order.service.url", "http://localhost:8081");
     private static final String INVENTORY_SERVICE_URL = System.getProperty("inventory.service.url", "http://localhost:8082");
@@ -26,9 +26,7 @@ public class ServiceChainCombinationsIT {
     // Entry Point C (shipping-service) - Leaf node, no downstream
     // ========================================================================
 
-    @Test
-    @Order(1)
-    @DisplayName("C alone: shipping-service standalone")
+    @Test(priority = 1, description = "C alone: shipping-service standalone")
     public void testC_shippingServiceAlone() throws Exception {
         // Test shipping service directly with no downstream dependencies
         Request request = new Request.Builder()
@@ -50,9 +48,7 @@ public class ServiceChainCombinationsIT {
     // Entry Point B (inventory-service)
     // ========================================================================
 
-    @Test
-    @Order(2)
-    @DisplayName("B→C: inventory-service with shipping-service")
+    @Test(priority = 2, description = "B→C: inventory-service with shipping-service")
     public void testB_C_inventoryWithShipping() throws Exception {
         // Test inventory service calling shipping service (B→C chain)
         Request request = new Request.Builder()
@@ -73,9 +69,7 @@ public class ServiceChainCombinationsIT {
         }
     }
 
-    @Test
-    @Order(3)
-    @DisplayName("B without C: inventory-service when shipping-service unavailable")
+    @Test(priority = 3, description = "B without C: inventory-service when shipping-service unavailable")
     public void testB_withoutC_inventoryWithoutShipping() throws Exception {
         // This test validates behavior when C (shipping) is down
         // In real scenario, you'd stop shipping-service before this test
@@ -102,9 +96,7 @@ public class ServiceChainCombinationsIT {
     // Entry Point A (order-service)
     // ========================================================================
 
-    @Test
-    @Order(4)
-    @DisplayName("A→B→C: full chain (order→inventory→shipping)")
+    @Test(priority = 4, description = "A→B→C: full chain (order→inventory→shipping)")
     public void testA_B_C_fullChain() throws Exception {
         // Test full chain: A calls B, B calls C
         String requestBody = "{\"sku\":\"FULL-CHAIN-SKU\",\"quantity\":2}";
@@ -130,9 +122,7 @@ public class ServiceChainCombinationsIT {
         }
     }
 
-    @Test
-    @Order(5)
-    @DisplayName("A→B without C: order→inventory when shipping unavailable")
+    @Test(priority = 5, description = "A→B without C: order→inventory when shipping unavailable")
     public void testA_B_withoutC_orderInventoryWithoutShipping() throws Exception {
         // Test A→B chain when C is unavailable
         // This simulates shipping service being down
@@ -155,9 +145,7 @@ public class ServiceChainCombinationsIT {
         }
     }
 
-    @Test
-    @Order(6)
-    @DisplayName("A alone: order-service GET (no downstream calls)")
+    @Test(priority = 6, description = "A alone: order-service GET (no downstream calls)")
     public void testA_alone_orderServiceGet() throws Exception {
         // First create an order (this will use full chain A→B→C)
         String createBody = "{\"sku\":\"GET-ONLY-SKU\",\"quantity\":1}";
@@ -171,8 +159,7 @@ public class ServiceChainCombinationsIT {
         try (Response response = client.newCall(createRequest).execute()) {
             if (!response.isSuccessful()) {
                 // If create fails due to downstream issues, skip this test
-                Assumptions.assumeTrue(false, "Skipping: cannot create order for GET test");
-                return;
+                throw new SkipException("Skipping: cannot create order for GET test");
             }
             JsonNode json = objectMapper.readTree(response.body().string());
             orderId = json.get("id").asText();
@@ -200,9 +187,7 @@ public class ServiceChainCombinationsIT {
     // Combination matrix tests
     // ========================================================================
 
-    @Test
-    @Order(7)
-    @DisplayName("Matrix: Test all combinations in sequence")
+    @Test(priority = 7, description = "Matrix: Test all combinations in sequence")
     public void testAllCombinationsMatrix() throws Exception {
         System.out.println("\n=== Service Chain Combination Matrix ===");
 
@@ -221,9 +206,7 @@ public class ServiceChainCombinationsIT {
         System.out.println("=======================================\n");
     }
 
-    @Test
-    @Order(8)
-    @DisplayName("Parallel: All entry points simultaneously")
+    @Test(priority = 8, description = "Parallel: All entry points simultaneously")
     public void testAllEntryPointsParallel() throws Exception {
         // Test all three entry points in parallel to verify isolation
         System.out.println("\n=== Testing all entry points in parallel ===");
