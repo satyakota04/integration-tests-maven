@@ -47,21 +47,18 @@ echo "==> Building and pushing Docker images..."
 cd shipping-service
 docker build --platform linux/amd64 -t ${DOCKER_USER}/shipping-service:${GIT_SHA} -t ${DOCKER_USER}/shipping-service:latest .
 docker push ${DOCKER_USER}/shipping-service:${GIT_SHA}
-docker push ${DOCKER_USER}/shipping-service:latest
 cd ..
 
 # Build and push inventory-service
 cd inventory-service
 docker build --platform linux/amd64 -t ${DOCKER_USER}/inventory-service:${GIT_SHA} -t ${DOCKER_USER}/inventory-service:latest .
 docker push ${DOCKER_USER}/inventory-service:${GIT_SHA}
-docker push ${DOCKER_USER}/inventory-service:latest
 cd ..
 
 # Build and push order-service
 cd order-service
 docker build --platform linux/amd64 -t ${DOCKER_USER}/order-service:${GIT_SHA} -t ${DOCKER_USER}/order-service:latest .
 docker push ${DOCKER_USER}/order-service:${GIT_SHA}
-docker push ${DOCKER_USER}/order-service:latest
 cd ..
 
 echo ""
