@@ -15,6 +15,11 @@ public class StockController {
         this.stockService = stockService;
     }
 
+    @GetMapping("/health")
+    public String health() {
+        return "OK";
+    }
+
     @GetMapping("/stock/{sku}")
     public StockItem getStock(@PathVariable String sku) {
         log.info(">>> [INVENTORY-SERVICE] Received GET /stock/{}", sku);

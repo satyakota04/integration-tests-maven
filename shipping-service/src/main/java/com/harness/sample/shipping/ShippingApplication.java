@@ -7,6 +7,7 @@ public class ShippingApplication {
         int port = Integer.parseInt(System.getProperty("server.port", "8083"));
 
         Javalin app = Javalin.create()
+            .get("/health", ctx -> ctx.result("OK").status(200))
             .get("/eta/{sku}", ShippingHandler::getEta)
             .start(port);
 
