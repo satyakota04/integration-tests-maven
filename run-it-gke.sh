@@ -31,18 +31,21 @@ echo "==> Starting port-forwards to GKE services..."
 
 # Port-forward order-service
 kubectl port-forward -n integration-tests svc/order-service 8081:8081 &
-PIDS+=($!)
-echo "Port-forwarding order-service on localhost:8081 (PID: ${PIDS[-1]})"
+PID=$!
+PIDS+=($PID)
+echo "Port-forwarding order-service on localhost:8081 (PID: $PID)"
 
 # Port-forward inventory-service
 kubectl port-forward -n integration-tests svc/inventory-service 8082:8082 &
-PIDS+=($!)
-echo "Port-forwarding inventory-service on localhost:8082 (PID: ${PIDS[-1]})"
+PID=$!
+PIDS+=($PID)
+echo "Port-forwarding inventory-service on localhost:8082 (PID: $PID)"
 
 # Port-forward shipping-service
 kubectl port-forward -n integration-tests svc/shipping-service 8083:8083 &
-PIDS+=($!)
-echo "Port-forwarding shipping-service on localhost:8083 (PID: ${PIDS[-1]})"
+PID=$!
+PIDS+=($PID)
+echo "Port-forwarding shipping-service on localhost:8083 (PID: $PID)"
 
 echo ""
 echo "==> Waiting for port-forwards to be ready..."

@@ -232,6 +232,103 @@ docker-compose down
 
 ---
 
+## ☁️ GKE Deployment & Testing
+
+Deploy services to Google Kubernetes Engine and run integration tests locally against the deployed services.
+
+### All-in-One: Build, Deploy, Test, Teardown
+
+```bash
+DOCKER_USER=your-dockerhub-username ./test-on-gke.sh
+```
+
+This single script:
+1. Builds Maven artifacts
+2. Builds Docker images for `linux/amd64` 
+3. Pushes images to Docker Hub (tagged with git SHA)
+4. Deploys to GKE in the `integration-tests` namespace
+5. Waits for pods to be ready
+6. Port-forwards services to localhost (8081/8082/8083)
+7. Runs all 24 integration tests locally
+8. **Automatically tears down GKE resources** (on success or failure)
+
+### Separate Deploy & Test Scripts
+
+For more control, use individual scripts:
+
+#### Deploy Only
+```bash
+DOCKER_USER=your-dockerhub-username ./deploy-gke.sh
+```
+Builds, pushes images, and deploys to GKE without running tests.
+
+#### Test Against Existing Deployment
+```bash
+./run-it-gke.sh
+```
+Port-forwards existing GKE services, runs tests, then tears down the deployment.
+
+### Prerequisites
+
+- Docker Hub account (or update manifests for different registry)
+- `kubectl` configured for your GKE cluster
+- `envsubst` command available (part of `gettext` package)
+- `nc` (netcat) for port availability checks
+
+```bash
+# macOS
+brew install gettext
+brew link --force gettext
+
+# Verify kubectl access
+kubectl config current-context
+```
+
+### How It Works
+
+**Local Tests → GKE Services:**
+- Services run in GKE pods with ClusterIP services (internal only)
+- `kubectl port-forward` maps GKE services to `localhost:8081/8082/8083`
+- Integration tests connect to localhost (no code changes needed)
+- After tests complete, all GKE resources are automatically cleaned up
+
+**Image Tagging:**
+- Images are tagged with git SHA (e.g., `satyakota04/order-service:5bd5f88`)
+- Also tagged as `:latest` for convenience
+- Kubernetes manifests use SHA tags to satisfy policy requirements
+
+**Health Checks:**
+- All services expose health endpoints for readiness probes
+- Shipping service: `/health`
+- Inventory service: `/actuator/health` (Spring Boot Actuator)
+- Order service: `/actuator/health` (Spring Boot Actuator)
+
+### Architecture
+
+```
+┌─────────────────┐
+│  Local Machine  │
+│                 │
+│  mvn test       │  ← Integration tests run locally
+│  (port 8081-83) │
+└────────┬────────┘
+         │ kubectl port-forward
+         ↓
+┌─────────────────────────────────┐
+│         GKE Cluster             │
+│  ┌────────────────────────────┐ │
+│  │  integration-tests ns      │ │
+│  │  ┌──────────────────────┐  │ │
+│  │  │  order-service       │  │ │
+│  │  │  inventory-service   │  │ │
+│  │  │  shipping-service    │  │ │
+│  │  └──────────────────────┘  │ │
+│  └────────────────────────────┘ │
+└─────────────────────────────────┘
+```
+
+---
+
 ## 💡 Design Decisions
 
 ✅ **In-memory data** - No external databases, hermetic tests  
