@@ -13,21 +13,21 @@ mvn clean package -DskipTests
 # Start shipping service (port 8083)
 echo ""
 echo "[2/4] Starting shipping-service on port 8083..."
-java -jar shipping-service/target/shipping-service-1.0-SNAPSHOT.jar &
+java -jar /Users/satya/Git/shipping-service/target/shipping-service-1.0-SNAPSHOT.jar &
 SHIPPING_PID=$!
 sleep 3
 
 # Start inventory service (port 8082)
 echo ""
 echo "[3/4] Starting inventory-service on port 8082..."
-java -jar inventory-service/target/inventory-service-1.0-SNAPSHOT.jar &
+java -jar /Users/satya/Git/inventory-service/target/inventory-service-1.0-SNAPSHOT.jar &
 INVENTORY_PID=$!
 sleep 5
 
 # Start order service (port 8081)
 echo ""
 echo "[4/4] Starting order-service on port 8081..."
-java -jar order-service/target/order-service-1.0-SNAPSHOT.jar &
+java -jar /Users/satya/Git/order-service/target/order-service-1.0-SNAPSHOT.jar &
 ORDER_PID=$!
 sleep 5
 
