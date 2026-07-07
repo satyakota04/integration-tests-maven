@@ -1,0 +1,322 @@
+➜  integration-tests-maven git:(main) ✗ ./run-it-ti.sh
+========================================
+Integration Tests - TI agent on test runner
+========================================
+
+Agent jar:      /Users/satya/Git/ti-agents/ti-agent/src/java/java-agent-trampoline/build/libs/java-agent-trampoline.jar
+Native agent:   /Users/satya/Git/ti-agents/ti-agent/src/ti.agent/bin/Release/net8.0/osx-arm64/native/ti-agent.dylib
+
+Writing test-runner agent config...
+  Java agent config:   /tmp/ti-it/runner/config.ini
+  Native agent config: /tmp/ti-it/runner/native-config.json
+  Native agent log:    /tmp/ti-it/runner/native-agent.log
+  Call-graph output:   /tmp/ti-it/runner/native/cg_*.{json,csv}
+
+Running integration tests (agent attached to forked test JVM via argLine)...
+[INFO] Scanning for projects...
+[INFO]
+[INFO] ----------------< com.harness.sample:integration-tests >----------------
+[INFO] Building integration-tests 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO]
+[INFO] --- resources:3.3.1:resources (default-resources) @ integration-tests ---
+[INFO] skip non existing resourceDirectory /Users/satya/Git/integration-tests-maven/integration-tests/src/main/resources
+[INFO]
+[INFO] --- compiler:3.11.0:compile (default-compile) @ integration-tests ---
+[INFO] No sources to compile
+[INFO]
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ integration-tests ---
+[INFO] skip non existing resourceDirectory /Users/satya/Git/integration-tests-maven/integration-tests/src/test/resources
+[INFO]
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ integration-tests ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO]
+[INFO] --- surefire:3.1.2:test (default-test) @ integration-tests ---
+[INFO] Using auto detected provider org.apache.maven.surefire.testng.TestNGProvider
+[INFO]
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running TestSuite
+SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+[ERROR] Bad type on operand stack
+Exception Details:
+  Location:
+    com/harness/sample/it/ComprehensiveMatrixIT.test7_allCombinationsParallel()V @66: invokedynamic
+  Reason:
+    Type '[Z' (current frame, stack[5]) is not assignable to '[[Z'
+  Current Frame:
+    bci: @66
+    flags: { }
+    locals: { 'com/harness/sample/it/ComprehensiveMatrixIT', 'com/harness/sample/it/ComprehensiveMatrixIT', '[Ljava/lang/Thread;', '[Z', '[Z', 'com/harness/sample/it/ComprehensiveMatrixIT' }
+    stack: { '[Ljava/lang/Thread;', integer, uninitialized 50, uninitialized 50, 'com/harness/sample/it/ComprehensiveMatrixIT', '[Z' }
+  Bytecode:
+    0000000: 0402 a000 06a7 000d b202 2204 b602 29a7
+    0000010: 0003 2a4c 00b2 003c 1301 79b6 0042 b200
+    0000020: 3c13 017b b600 4207 bd01 7d4d 07bc 044e
+    0000030: 2c03 bb01 7d59 2b2d 3a04 3a05 0157 1905
+    0000040: 1904 ba02 3300 00b8 0239 b701 8353 2c04
+    0000050: bb01 7d59 2b2d 3a04 3a05 0157 1905 1904
+    0000060: ba02 3d00 00b8 0239 b701 8353 2c05 bb01
+    0000070: 7d59 2b2d 3a04 3a05 0157 1905 1904 ba02
+    0000080: 4100 00b8 0239 b701 8353 2c06 bb01 7d59
+    0000090: 2b2d 3a04 3a05 0157 1905 1904 ba02 4500
+    00000a0: 00b8 0239 b701 8353 2c59 3a07 be36 0603
+    00000b0: 3605 a700 1219 0715 0532 3a04 1904 b601
+    00000c0: 8984 0501 1505 1506 a1ff ed2c 593a 07be
+    00000d0: 3606 0336 05a7 0015 1907 1505 323a 0419
+    00000e0: 0414 018c b601 8e84 0501 1505 1506 a1ff
+    00000f0: eab2 003c 1301 92b6 0042 b200 3c2d 0333
+    0000100: 9900 0913 0194 a700 0613 0196 ba01 9800
+    0000110: 00b6 0042 b200 3c2d 0433 9900 0913 0194
+    0000120: a700 0613 0196 ba01 9900 00b6 0042 b200
+    0000130: 3c2d 0533 9900 0913 0194 a700 0613 0196
+    0000140: ba01 9a00 00b6 0042 b200 3c2d 0633 9900
+    0000150: 0913 0194 a700 0613 0196 ba01 9b00 00b6
+    0000160: 0042 2d03 33b8 0086 b600 9457 2d04 33b8
+    0000170: 0086 b600 9457 2d05 33b8 0086 b600 9457
+    0000180: 2d06 33b8 0086 b600 9457 b200 3c13 019c
+    0000190: b600 42a7 0003 014c a700 044c 0402 a000
+    00001a0: 06a7 000c b202 22b6 022c a700 032b c600
+    00001b0: 052b bfb1
+  Exception Handler Table:
+    bci [21, 406] => handler: 411
+  Stackmap Table:
+    same_frame(@8)
+    same_frame(@18)
+    append_frame(@20,Object[#1])
+    full_frame(@181,{Object[#1],Object[#1],Object[#420],Object[#421],Top,Integer,Integer,Object[#420]},{})
+    same_frame(@196)
+    same_frame(@216)
+    same_frame(@234)
+    full_frame(@265,{Object[#1],Object[#1],Object[#420],Object[#421]},{Object[#67]})
+    full_frame(@268,{Object[#1],Object[#1],Object[#420],Object[#421]},{Object[#67],Object[#316]})
+    same_locals_1_stack_item_frame(@291,Object[#67])
+    full_frame(@294,{Object[#1],Object[#1],Object[#420],Object[#421]},{Object[#67],Object[#316]})
+    same_locals_1_stack_item_frame(@317,Object[#67])
+    full_frame(@320,{Object[#1],Object[#1],Object[#420],Object[#421]},{Object[#67],Object[#316]})
+    same_locals_1_stack_item_frame(@343,Object[#67])
+    full_frame(@346,{Object[#1],Object[#1],Object[#420],Object[#421]},{Object[#67],Object[#316]})
+    full_frame(@406,{Object[#1]},{})
+    same_locals_1_stack_item_frame(@411,Object[#207])
+    append_frame(@412,Object[#207])
+    same_frame(@420)
+    same_frame(@429)
+    same_frame(@435)
+[INFO]
+[INFO] Results:
+[INFO]
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0
+[INFO]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  1.946 s
+[INFO] Finished at: 2026-07-07T15:00:31+05:30
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.1.2:test (default-test) on project integration-tests:
+[ERROR]
+[ERROR] Please refer to /Users/satya/Git/integration-tests-maven/integration-tests/target/surefire-reports for the individual test results.
+[ERROR] Please refer to dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] There was an error in the forked process
+[ERROR] Bad type on operand stack
+[ERROR] Exception Details:
+[ERROR]   Location:
+[ERROR]     com/harness/sample/it/ComprehensiveMatrixIT.test7_allCombinationsParallel()V @66: invokedynamic
+[ERROR]   Reason:
+[ERROR]     Type '[Z' (current frame, stack[5]) is not assignable to '[[Z'
+[ERROR]   Current Frame:
+[ERROR]     bci: @66
+[ERROR]     flags: { }
+[ERROR]     locals: { 'com/harness/sample/it/ComprehensiveMatrixIT', 'com/harness/sample/it/ComprehensiveMatrixIT', '[Ljava/lang/Thread;', '[Z', '[Z', 'com/harness/sample/it/ComprehensiveMatrixIT' }
+[ERROR]     stack: { '[Ljava/lang/Thread;', integer, uninitialized 50, uninitialized 50, 'com/harness/sample/it/ComprehensiveMatrixIT', '[Z' }
+[ERROR]   Bytecode:
+[ERROR]     0000000: 0402 a000 06a7 000d b202 2204 b602 29a7
+[ERROR]     0000010: 0003 2a4c 00b2 003c 1301 79b6 0042 b200
+[ERROR]     0000020: 3c13 017b b600 4207 bd01 7d4d 07bc 044e
+[ERROR]     0000030: 2c03 bb01 7d59 2b2d 3a04 3a05 0157 1905
+[ERROR]     0000040: 1904 ba02 3300 00b8 0239 b701 8353 2c04
+[ERROR]     0000050: bb01 7d59 2b2d 3a04 3a05 0157 1905 1904
+[ERROR]     0000060: ba02 3d00 00b8 0239 b701 8353 2c05 bb01
+[ERROR]     0000070: 7d59 2b2d 3a04 3a05 0157 1905 1904 ba02
+[ERROR]     0000080: 4100 00b8 0239 b701 8353 2c06 bb01 7d59
+[ERROR]     0000090: 2b2d 3a04 3a05 0157 1905 1904 ba02 4500
+[ERROR]     00000a0: 00b8 0239 b701 8353 2c59 3a07 be36 0603
+[ERROR]     00000b0: 3605 a700 1219 0715 0532 3a04 1904 b601
+[ERROR]     00000c0: 8984 0501 1505 1506 a1ff ed2c 593a 07be
+[ERROR]     00000d0: 3606 0336 05a7 0015 1907 1505 323a 0419
+[ERROR]     00000e0: 0414 018c b601 8e84 0501 1505 1506 a1ff
+[ERROR]     00000f0: eab2 003c 1301 92b6 0042 b200 3c2d 0333
+[ERROR]     0000100: 9900 0913 0194 a700 0613 0196 ba01 9800
+[ERROR]     0000110: 00b6 0042 b200 3c2d 0433 9900 0913 0194
+[ERROR]     0000120: a700 0613 0196 ba01 9900 00b6 0042 b200
+[ERROR]     0000130: 3c2d 0533 9900 0913 0194 a700 0613 0196
+[ERROR]     0000140: ba01 9a00 00b6 0042 b200 3c2d 0633 9900
+[ERROR]     0000150: 0913 0194 a700 0613 0196 ba01 9b00 00b6
+[ERROR]     0000160: 0042 2d03 33b8 0086 b600 9457 2d04 33b8
+[ERROR]     0000170: 0086 b600 9457 2d05 33b8 0086 b600 9457
+[ERROR]     0000180: 2d06 33b8 0086 b600 9457 b200 3c13 019c
+[ERROR]     0000190: b600 42a7 0003 014c a700 044c 0402 a000
+[ERROR]     00001a0: 06a7 000c b202 22b6 022c a700 032b c600
+[ERROR]     00001b0: 052b bfb1
+[ERROR]   Exception Handler Table:
+[ERROR]     bci [21, 406] => handler: 411
+[ERROR]   Stackmap Table:
+[ERROR]     same_frame(@8)
+[ERROR]     same_frame(@18)
+[ERROR]     append_frame(@20,Object[#1])
+[ERROR]     full_frame(@181,{Object[#1],Object[#1],Object[#420],Object[#421],Top,Integer,Integer,Object[#420]},{})
+[ERROR]     same_frame(@196)
+[ERROR]     same_frame(@216)
+[ERROR]     same_frame(@234)
+[ERROR]     full_frame(@265,{Object[#1],Object[#1],Object[#420],Object[#421]},{Object[#67]})
+[ERROR]     full_frame(@268,{Object[#1],Object[#1],Object[#420],Object[#421]},{Object[#67],Object[#316]})
+[ERROR]     same_locals_1_stack_item_frame(@291,Object[#67])
+[ERROR]     full_frame(@294,{Object[#1],Object[#1],Object[#420],Object[#421]},{Object[#67],Object[#316]})
+[ERROR]     same_locals_1_stack_item_frame(@317,Object[#67])
+[ERROR]     full_frame(@320,{Object[#1],Object[#1],Object[#420],Object[#421]},{Object[#67],Object[#316]})
+[ERROR]     same_locals_1_stack_item_frame(@343,Object[#67])
+[ERROR]     full_frame(@346,{Object[#1],Object[#1],Object[#420],Object[#421]},{Object[#67],Object[#316]})
+[ERROR]     full_frame(@406,{Object[#1]},{})
+[ERROR]     same_locals_1_stack_item_frame(@411,Object[#207])
+[ERROR]     append_frame(@412,Object[#207])
+[ERROR]     same_frame(@420)
+[ERROR]     same_frame(@429)
+[ERROR]     same_frame(@435)
+[ERROR]
+[ERROR] org.apache.maven.surefire.booter.SurefireBooterForkException: There was an error in the forked process
+[ERROR] Bad type on operand stack
+[ERROR] Exception Details:
+[ERROR]   Location:
+[ERROR]     com/harness/sample/it/ComprehensiveMatrixIT.test7_allCombinationsParallel()V @66: invokedynamic
+[ERROR]   Reason:
+[ERROR]     Type '[Z' (current frame, stack[5]) is not assignable to '[[Z'
+[ERROR]   Current Frame:
+[ERROR]     bci: @66
+[ERROR]     flags: { }
+[ERROR]     locals: { 'com/harness/sample/it/ComprehensiveMatrixIT', 'com/harness/sample/it/ComprehensiveMatrixIT', '[Ljava/lang/Thread;', '[Z', '[Z', 'com/harness/sample/it/ComprehensiveMatrixIT' }
+[ERROR]     stack: { '[Ljava/lang/Thread;', integer, uninitialized 50, uninitialized 50, 'com/harness/sample/it/ComprehensiveMatrixIT', '[Z' }
+[ERROR]   Bytecode:
+[ERROR]     0000000: 0402 a000 06a7 000d b202 2204 b602 29a7
+[ERROR]     0000010: 0003 2a4c 00b2 003c 1301 79b6 0042 b200
+[ERROR]     0000020: 3c13 017b b600 4207 bd01 7d4d 07bc 044e
+[ERROR]     0000030: 2c03 bb01 7d59 2b2d 3a04 3a05 0157 1905
+[ERROR]     0000040: 1904 ba02 3300 00b8 0239 b701 8353 2c04
+[ERROR]     0000050: bb01 7d59 2b2d 3a04 3a05 0157 1905 1904
+[ERROR]     0000060: ba02 3d00 00b8 0239 b701 8353 2c05 bb01
+[ERROR]     0000070: 7d59 2b2d 3a04 3a05 0157 1905 1904 ba02
+[ERROR]     0000080: 4100 00b8 0239 b701 8353 2c06 bb01 7d59
+[ERROR]     0000090: 2b2d 3a04 3a05 0157 1905 1904 ba02 4500
+[ERROR]     00000a0: 00b8 0239 b701 8353 2c59 3a07 be36 0603
+[ERROR]     00000b0: 3605 a700 1219 0715 0532 3a04 1904 b601
+[ERROR]     00000c0: 8984 0501 1505 1506 a1ff ed2c 593a 07be
+[ERROR]     00000d0: 3606 0336 05a7 0015 1907 1505 323a 0419
+[ERROR]     00000e0: 0414 018c b601 8e84 0501 1505 1506 a1ff
+[ERROR]     00000f0: eab2 003c 1301 92b6 0042 b200 3c2d 0333
+[ERROR]     0000100: 9900 0913 0194 a700 0613 0196 ba01 9800
+[ERROR]     0000110: 00b6 0042 b200 3c2d 0433 9900 0913 0194
+[ERROR]     0000120: a700 0613 0196 ba01 9900 00b6 0042 b200
+[ERROR]     0000130: 3c2d 0533 9900 0913 0194 a700 0613 0196
+[ERROR]     0000140: ba01 9a00 00b6 0042 b200 3c2d 0633 9900
+[ERROR]     0000150: 0913 0194 a700 0613 0196 ba01 9b00 00b6
+[ERROR]     0000160: 0042 2d03 33b8 0086 b600 9457 2d04 33b8
+[ERROR]     0000170: 0086 b600 9457 2d05 33b8 0086 b600 9457
+[ERROR]     0000180: 2d06 33b8 0086 b600 9457 b200 3c13 019c
+[ERROR]     0000190: b600 42a7 0003 014c a700 044c 0402 a000
+[ERROR]     00001a0: 06a7 000c b202 22b6 022c a700 032b c600
+[ERROR]     00001b0: 052b bfb1
+[ERROR]   Exception Handler Table:
+[ERROR]     bci [21, 406] => handler: 411
+[ERROR]   Stackmap Table:
+[ERROR]     same_frame(@8)
+[ERROR]     same_frame(@18)
+[ERROR]     append_frame(@20,Object[#1])
+[ERROR]     full_frame(@181,{Object[#1],Object[#1],Object[#420],Object[#421],Top,Integer,Integer,Object[#420]},{})
+[ERROR]     same_frame(@196)
+[ERROR]     same_frame(@216)
+[ERROR]     same_frame(@234)
+[ERROR]     full_frame(@265,{Object[#1],Object[#1],Object[#420],Object[#421]},{Object[#67]})
+[ERROR]     full_frame(@268,{Object[#1],Object[#1],Object[#420],Object[#421]},{Object[#67],Object[#316]})
+[ERROR]     same_locals_1_stack_item_frame(@291,Object[#67])
+[ERROR]     full_frame(@294,{Object[#1],Object[#1],Object[#420],Object[#421]},{Object[#67],Object[#316]})
+[ERROR]     same_locals_1_stack_item_frame(@317,Object[#67])
+[ERROR]     full_frame(@320,{Object[#1],Object[#1],Object[#420],Object[#421]},{Object[#67],Object[#316]})
+[ERROR]     same_locals_1_stack_item_frame(@343,Object[#67])
+[ERROR]     full_frame(@346,{Object[#1],Object[#1],Object[#420],Object[#421]},{Object[#67],Object[#316]})
+[ERROR]     full_frame(@406,{Object[#1]},{})
+[ERROR]     same_locals_1_stack_item_frame(@411,Object[#207])
+[ERROR]     append_frame(@412,Object[#207])
+[ERROR]     same_frame(@420)
+[ERROR]     same_frame(@429)
+[ERROR]     same_frame(@435)
+[ERROR]
+[ERROR]         at org.apache.maven.plugin.surefire.booterclient.ForkStarter.fork(ForkStarter.java:628)
+[ERROR]         at org.apache.maven.plugin.surefire.booterclient.ForkStarter.run(ForkStarter.java:285)
+[ERROR]         at org.apache.maven.plugin.surefire.booterclient.ForkStarter.run(ForkStarter.java:250)
+[ERROR]         at org.apache.maven.plugin.surefire.AbstractSurefireMojo.executeProvider(AbstractSurefireMojo.java:1203)
+[ERROR]         at org.apache.maven.plugin.surefire.AbstractSurefireMojo.executeAfterPreconditionsChecked(AbstractSurefireMojo.java:1055)
+[ERROR]         at org.apache.maven.plugin.surefire.AbstractSurefireMojo.execute(AbstractSurefireMojo.java:871)
+[ERROR]         at org.apache.maven.plugin.DefaultBuildPluginManager.executeMojo(DefaultBuildPluginManager.java:126)
+[ERROR]         at org.apache.maven.lifecycle.internal.MojoExecutor.doExecute2(MojoExecutor.java:328)
+[ERROR]         at org.apache.maven.lifecycle.internal.MojoExecutor.doExecute(MojoExecutor.java:316)
+[ERROR]         at org.apache.maven.lifecycle.internal.MojoExecutor.execute(MojoExecutor.java:212)
+[ERROR]         at org.apache.maven.lifecycle.internal.MojoExecutor.execute(MojoExecutor.java:174)
+[ERROR]         at org.apache.maven.lifecycle.internal.MojoExecutor.access$000(MojoExecutor.java:75)
+[ERROR]         at org.apache.maven.lifecycle.internal.MojoExecutor$1.run(MojoExecutor.java:162)
+[ERROR]         at org.apache.maven.plugin.DefaultMojosExecutionStrategy.execute(DefaultMojosExecutionStrategy.java:39)
+[ERROR]         at org.apache.maven.lifecycle.internal.MojoExecutor.execute(MojoExecutor.java:159)
+[ERROR]         at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject(LifecycleModuleBuilder.java:105)
+[ERROR]         at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject(LifecycleModuleBuilder.java:73)
+[ERROR]         at org.apache.maven.lifecycle.internal.builder.singlethreaded.SingleThreadedBuilder.build(SingleThreadedBuilder.java:53)
+[ERROR]         at org.apache.maven.lifecycle.internal.LifecycleStarter.execute(LifecycleStarter.java:118)
+[ERROR]         at org.apache.maven.DefaultMaven.doExecute(DefaultMaven.java:261)
+[ERROR]         at org.apache.maven.DefaultMaven.doExecute(DefaultMaven.java:173)
+[ERROR]         at org.apache.maven.DefaultMaven.execute(DefaultMaven.java:101)
+[ERROR]         at org.apache.maven.cli.MavenCli.execute(MavenCli.java:919)
+[ERROR]         at org.apache.maven.cli.MavenCli.doMain(MavenCli.java:285)
+[ERROR]         at org.apache.maven.cli.MavenCli.main(MavenCli.java:207)
+[ERROR]         at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+[ERROR]         at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+[ERROR]         at org.codehaus.plexus.classworlds.launcher.Launcher.launchEnhanced(Launcher.java:255)
+[ERROR]         at org.codehaus.plexus.classworlds.launcher.Launcher.launch(Launcher.java:201)
+[ERROR]         at org.codehaus.plexus.classworlds.launcher.Launcher.mainWithExitCode(Launcher.java:361)
+[ERROR]         at org.codehaus.plexus.classworlds.launcher.Launcher.main(Launcher.java:314)
+[ERROR]
+[ERROR] -> [Help 1]
+[ERROR]
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR]
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException
+
+Tests: FAILED (exit 1)
+
+========================================
+Call-graph output location
+========================================
+  test-runner: /tmp/ti-it/runner/native/cg_86468.json
+  test-runner: /tmp/ti-it/runner/native/cg_bc18cd31-b4c6-46c1-9e03-bc1b430f2808_49473.json
+  test-runner: /tmp/ti-it/runner/native/cg_4cda6940-5778-4c34-b0eb-b620bd13d025_86468.json
+  test-runner: /tmp/ti-it/runner/native/cg_49473.csv
+  test-runner: /tmp/ti-it/runner/native/cg_13862.json
+  test-runner: /tmp/ti-it/runner/native/cg_a3cdf1f9-5b4b-46ff-a90f-c1c4ca7a815e_13862.csv
+  test-runner: /tmp/ti-it/runner/native/cg_18940.json
+  test-runner: /tmp/ti-it/runner/native/cg_18940.csv
+  test-runner: /tmp/ti-it/runner/native/cg_a3cdf1f9-5b4b-46ff-a90f-c1c4ca7a815e_13862.json
+  test-runner: /tmp/ti-it/runner/native/cg_385702d3-3d2e-48a9-af8a-5f2c2efe963b_18940.json
+  test-runner: /tmp/ti-it/runner/native/cg_a517af51-adfa-473f-b02e-65179a86a2e4_77047.json
+  test-runner: /tmp/ti-it/runner/native/cg_77047.json
+  test-runner: /tmp/ti-it/runner/native/cg_13862.csv
+  test-runner: /tmp/ti-it/runner/native/cg_77047.csv
+  test-runner: /tmp/ti-it/runner/native/cg_a517af51-adfa-473f-b02e-65179a86a2e4_77047.csv
+  test-runner: /tmp/ti-it/runner/native/cg_86468.csv
+  test-runner: /tmp/ti-it/runner/native/cg_bc18cd31-b4c6-46c1-9e03-bc1b430f2808_49473.csv
+  test-runner: /tmp/ti-it/runner/native/cg_4cda6940-5778-4c34-b0eb-b620bd13d025_86468.csv
+  test-runner: /tmp/ti-it/runner/native/cg_385702d3-3d2e-48a9-af8a-5f2c2efe963b_18940.csv
+  test-runner: /tmp/ti-it/runner/native/cg_49473.json
+
+➜  integration-tests-maven git:(main) ✗
