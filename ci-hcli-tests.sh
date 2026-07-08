@@ -8,22 +8,16 @@
 #   bin/ti-agent.so            - native TI agent (linux-x64)
 #
 # Designed to run inside the Harness CI pipeline (.harness/integration-tests-hcli.yaml)
-# but is parameterized by env vars so it can be dry-run locally too.
+# but can be run locally too. Service URLs default to the ngrok reserved domains.
 #
-# Required env:
+# Optional env (all have defaults):
 #   ORDER_SERVICE_URL, INVENTORY_SERVICE_URL, SHIPPING_SERVICE_URL  (ngrok tunnel URLs)
-# Optional env:
 #   TI_DATA_DIR (default ./ti-it), TI_LOG_LEVEL (default 5)
 #   TI_SERVICE_ENDPOINT (default dummy), TI_SERVICE_TOKEN (default dummy)
 #   HARNESS_* context vars are auto-injected by Harness CI; fallbacks provided for dry-run.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-require_env() {
-  local v="$1"
-  if [[ -z "${!v:-}" ]]; then echo "Missing required env: $v" >&2; exit 1; fi
-}
 
 require_file() {
   if [[ ! -f "$1" ]]; then echo "Missing required file: $1" >&2; exit 1; fi
@@ -33,9 +27,10 @@ echo "========================================"
 echo "CI hcli integration tests"
 echo "========================================"
 
-require_env ORDER_SERVICE_URL
-require_env INVENTORY_SERVICE_URL
-require_env SHIPPING_SERVICE_URL
+# --- Service URLs (default to ngrok reserved domains) ---
+ORDER_SERVICE_URL="${ORDER_SERVICE_URL:-https://order-kota.ngrok-free.dev}"
+INVENTORY_SERVICE_URL="${INVENTORY_SERVICE_URL:-https://inventory-kota.ngrok-free.dev}"
+SHIPPING_SERVICE_URL="${SHIPPING_SERVICE_URL:-https://shipping-kota.ngrok-free.dev}"
 
 # --- Artifacts (committed to repo under bin/) ---
 HCLI_BIN="${HCLI_BIN:-$SCRIPT_DIR/bin/hcli-linux}"

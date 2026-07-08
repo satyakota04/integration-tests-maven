@@ -38,10 +38,6 @@ pipeline:
                       set -e
                       chmod +x ci-hcli-tests.sh bin/hcli-linux
                       ./ci-hcli-tests.sh
-                    envVariables:
-                      ORDER_SERVICE_URL: <+pipeline.variables.ORDER_SERVICE_URL>
-                      INVENTORY_SERVICE_URL: <+pipeline.variables.INVENTORY_SERVICE_URL>
-                      SHIPPING_SERVICE_URL: <+pipeline.variables.SHIPPING_SERVICE_URL>
                     privileged: false
                     resources:
                       limits:
