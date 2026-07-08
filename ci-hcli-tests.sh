@@ -28,9 +28,15 @@ echo "CI hcli integration tests"
 echo "========================================"
 
 # --- Service URLs (default to ngrok reserved domains) ---
+# Full URLs for the test -D* props (Maven tests use these directly)
 ORDER_SERVICE_URL="${ORDER_SERVICE_URL:-https://order-kota.ngrok-free.dev}"
 INVENTORY_SERVICE_URL="${INVENTORY_SERVICE_URL:-https://inventory-kota.ngrok-free.dev}"
 SHIPPING_SERVICE_URL="${SHIPPING_SERVICE_URL:-https://shipping-kota.ngrok-free.dev}"
+
+# Hostnames only for hcli services.yaml (hcli hardcodes http:// prefix)
+ORDER_SERVICE_HOST="${ORDER_SERVICE_HOST:-order-kota.ngrok-free.dev}"
+INVENTORY_SERVICE_HOST="${INVENTORY_SERVICE_HOST:-inventory-kota.ngrok-free.dev}"
+SHIPPING_SERVICE_HOST="${SHIPPING_SERVICE_HOST:-shipping-kota.ngrok-free.dev}"
 
 # --- Artifacts (committed to repo under bin/) ---
 HCLI_BIN="${HCLI_BIN:-$SCRIPT_DIR/bin/hcli-linux}"
@@ -52,12 +58,12 @@ echo "agent jar:   $AGENT_JAR"
 echo "native lib:  $NATIVE_AGENT"
 echo ""
 
-# --- services.yaml for hcli (ngrok tunnel URLs) ---
+# --- services.yaml for hcli (hostnames only — hcli hardcodes http:// prefix) ---
 cat > "$TI_DATA_DIR/services.yaml" <<EOF
 services:
-  - $ORDER_SERVICE_URL
-  - $INVENTORY_SERVICE_URL
-  - $SHIPPING_SERVICE_URL
+  - $ORDER_SERVICE_HOST
+  - $INVENTORY_SERVICE_HOST
+  - $SHIPPING_SERVICE_HOST
 EOF
 echo "services.yaml: $TI_DATA_DIR/services.yaml"
 
@@ -106,6 +112,22 @@ export CI_REPO_LINK="${CI_REPO_LINK:-https://github.com/harness-community/integr
 
 # --- run integration tests via hcli, agent attached to the test JVM via argLine ---
 cd "$SCRIPT_DIR"
+
+# Install harnessti-maven-plugin into local Maven repo (not in Maven Central)
+PLUGIN_JAR="$SCRIPT_DIR/bin/maven-plugin/harnessti-maven-plugin-1.0.0-SNAPSHOT.jar"
+PLUGIN_POM="$SCRIPT_DIR/bin/maven-plugin/harnessti-maven-plugin-1.0.0-SNAPSHOT.pom"
+if [[ -f "$PLUGIN_JAR" && -f "$PLUGIN_POM" ]]; then
+  echo "Installing harnessti-maven-plugin into local Maven repo..."
+  mvn install:install-file \
+    -Dfile="$PLUGIN_JAR" \
+    -DpomFile="$PLUGIN_POM" \
+    -q
+  echo "  Plugin installed."
+else
+  echo "WARNING: harnessti-maven-plugin not found in bin/maven-plugin/ — build may fail." >&2
+fi
+echo ""
+
 TEST_EXIT=0
 "$HCLI_BIN" htx \
   --ti-data-dir="$TI_DATA_DIR" \
