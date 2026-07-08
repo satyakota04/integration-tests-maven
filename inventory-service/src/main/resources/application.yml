@@ -3,4 +3,4 @@ server:
 
 shipping:
   service:
-    url: http://localhost:8083
+    url: https://shipping-kota.ngrok-free.dev

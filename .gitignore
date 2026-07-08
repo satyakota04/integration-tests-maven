@@ -21,3 +21,6 @@ buildNumber.properties
 
 # Claude
 .claude/
+
+# TI agent / hcli artifacts are committed to bin/ for CI
+# (do NOT ignore bin/)

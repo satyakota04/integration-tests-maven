@@ -144,3 +144,65 @@ This was the bug - fixed now. The native agent now correctly identifies:
 Edit the service scripts and change:
 - `logConsole: false` → `logConsole: true` (in config.ini)
 - `"console": "false"` → `"console": "true"` (in native-config.json)
+
+## CI via Tunnel (services on PC, hcli in Harness CI)
+
+Instead of running the services in the CI runner, keep the services (with the TI
+agent) running on your PC and run **only `hcli`** in a Harness CI pipeline, reaching
+the services over public tunnels.
+
+> Not reproducible per-push: the pipeline fails whenever your PC or the tunnels are
+> offline. Use this for on-demand/manual runs. For real per-push CI, run the services
+> in the pipeline instead (see `test-on-gke.sh` / `.harness/integration-tests-gke*.yaml`).
+
+### 1. Start services on the PC (agent attached)
+
+```bash
+./run-all-services.sh
+# or run ./run-shipping.sh, ./run-inventory.sh, ./run-order.sh in separate terminals
+```
+
+### 2. Expose the 3 entry ports via tunnels
+
+```bash
+./tunnel-services.sh
+```
+
+This uses **reserved ngrok domains** from `~/Library/Application Support/ngrok/ngrok.yml`
+(named tunnels `order`/`inventory`/`shipping`), so the URLs are stable and known in
+advance — no need to copy them each run:
+
+| service   | port | URL                                  |
+|-----------|------|--------------------------------------|
+| order     | 8081 | https://order-kota.ngrok-free.dev    |
+| inventory | 8082 | https://inventory-kota.ngrok-free.dev |
+| shipping  | 8083 | https://shipping-kota.ngrok-free.dev |
+
+Inter-service calls (order→inventory→shipping) stay on localhost on your PC; only the
+entry ports are tunneled. Keep this terminal open for the whole pipeline run.
+
+> Prerequisite: the 3 domains must be reserved on your ngrok dashboard and the named
+> tunnels present in `ngrok.yml`. Override domains via `ORDER_DOMAIN` / `INVENTORY_DOMAIN`
+> / `SHIPPING_DOMAIN` env vars if you rename them. Alternative provider:
+> `TUNNEL_PROVIDER=cloudflared ./tunnel-services.sh`.
+
+### 3. Publish linux-x64 artifacts once
+
+The CI runner is Linux, so it needs linux-x64 builds (NOT the osx-arm64 ones on your
+Mac). Publish these somewhere HTTP-accessible (GitHub Release / GCS / etc.):
+- `hcli` (linux-x64 Go binary)
+- `java-agent-trampoline.jar` (platform-independent)
+- `ti-agent.so` (linux-x64 native agent; build with `dotnet publish ... -r linux-x64`)
+
+### 4. Trigger the Harness CI pipeline
+
+Pipeline: `.harness/integration-tests-hcli.yaml` (identifier `integration_tests_hcli`).
+
+Trigger it manually and provide these pipeline variables:
+- `ORDER_SERVICE_URL`, `INVENTORY_SERVICE_URL`, `SHIPPING_SERVICE_URL` — the tunnel URLs
+- `HCLI_BINARY_URL`, `TI_AGENT_JAR_URL`, `TI_NATIVE_AGENT_URL` — the artifact URLs from step 3
+- `TI_SERVICE_ENDPOINT` (optional, defaults to a dummy endpoint)
+
+The pipeline runs `ci-hcli-tests.sh`, which downloads the artifacts, attaches the TI
+agent to the test runner (`mvn test` via `hcli`), points the tests at the tunnel URLs,
+and prints the call-graph output.

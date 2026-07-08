@@ -3,4 +3,4 @@ server:
 
 inventory:
   service:
-    url: http://localhost:8082
+    url: https://inventory-kota.ngrok-free.dev

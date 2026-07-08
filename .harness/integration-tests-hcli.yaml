@@ -1,0 +1,77 @@
+pipeline:
+  name: Integration Tests via hcli (Tunnel)
+  identifier: integration_tests_hcli
+  projectIdentifier: <your-project-id>
+  orgIdentifier: <your-org-id>
+  tags: {}
+  properties:
+    ci:
+      codebase:
+        connectorRef: <your-git-connector>
+        repoName: integration-tests-maven
+        build: <+input>
+  stages:
+    - stage:
+        name: Run hcli tests
+        identifier: run_hcli_tests
+        type: CI
+        spec:
+          cloneCodebase: true
+          infrastructure:
+            type: KubernetesDirect
+            spec:
+              connectorRef: <your-k8s-connector>
+              namespace: harness-builds
+              automountServiceAccountToken: true
+          execution:
+            steps:
+              - step:
+                  type: Run
+                  name: Run hcli integration tests
+                  identifier: run_hcli_tests
+                  spec:
+                    connectorRef: <your-docker-connector>
+                    image: maven:3.9-eclipse-temurin-17
+                    shell: Bash
+                    command: |
+                      #!/bin/bash
+                      set -e
+                      chmod +x ci-hcli-tests.sh bin/hcli-linux
+                      ./ci-hcli-tests.sh
+                    envVariables:
+                      ORDER_SERVICE_URL: <+pipeline.variables.ORDER_SERVICE_URL>
+                      INVENTORY_SERVICE_URL: <+pipeline.variables.INVENTORY_SERVICE_URL>
+                      SHIPPING_SERVICE_URL: <+pipeline.variables.SHIPPING_SERVICE_URL>
+                    privileged: false
+                    resources:
+                      limits:
+                        memory: 2Gi
+                        cpu: "1"
+                  timeout: 20m
+                  failureStrategies:
+                    - onFailure:
+                        errors:
+                          - AllErrors
+                        action:
+                          type: Abort
+                  when:
+                    stageStatus: Success
+          serviceDependencies: []
+          sharedPaths: []
+        variables: []
+  variables:
+    - name: ORDER_SERVICE_URL
+      type: String
+      description: ngrok tunnel URL for order-service (https://order-kota.ngrok-free.dev)
+      required: true
+      value: https://order-kota.ngrok-free.dev
+    - name: INVENTORY_SERVICE_URL
+      type: String
+      description: ngrok tunnel URL for inventory-service (https://inventory-kota.ngrok-free.dev)
+      required: true
+      value: https://inventory-kota.ngrok-free.dev
+    - name: SHIPPING_SERVICE_URL
+      type: String
+      description: ngrok tunnel URL for shipping-service (https://shipping-kota.ngrok-free.dev)
+      required: true
+      value: https://shipping-kota.ngrok-free.dev
