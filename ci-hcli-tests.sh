@@ -19,6 +19,15 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# --- Ensure required system libs for the native TI agent (.NET NativeAOT) ---
+if command -v apt-get >/dev/null 2>&1 && ! ldconfig -p 2>/dev/null | grep -q libicu; then
+  echo "Installing libicu (required by native TI agent)..."
+  apt-get update -qq && apt-get install -y -qq libicu > /dev/null 2>&1 || true
+fi
+
+# --- Ensure binaries are executable ---
+chmod +x "$SCRIPT_DIR/bin/hcli-linux" 2>/dev/null || true
+
 require_file() {
   if [[ ! -f "$1" ]]; then echo "Missing required file: $1" >&2; exit 1; fi
 }
