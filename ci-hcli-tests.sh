@@ -117,17 +117,6 @@ echo ""
 export CI_ENABLE_HCLI_FOR_INTEGRATION_TESTS=true
 export HARNESS_TI_AGENT_PATH="$NATIVE_AGENT"
 export TI_AGENT_CONFIG="$RUNNER_DIR/native-config.json"
-export HARNESS_TI_SERVICE_ENDPOINT="${TI_SERVICE_ENDPOINT:-http://localhost:9999}"
-export HARNESS_TI_SERVICE_TOKEN="${TI_SERVICE_TOKEN:-dummy-token}"
-export HARNESS_ACCOUNT_ID="${HARNESS_ACCOUNT_ID:-test-account}"
-export HARNESS_ORG_ID="${HARNESS_ORG_ID:-test-org}"
-export HARNESS_PROJECT_ID="${HARNESS_PROJECT_ID:-test-project}"
-export HARNESS_PIPELINE_ID="${HARNESS_PIPELINE_ID:-test-pipeline}"
-export HARNESS_STAGE_ID="${HARNESS_STAGE_ID:-test-stage}"
-export HARNESS_STEP_ID="${HARNESS_STEP_ID:-test-step}"
-export HARNESS_PARENT_UNIQUE_ID="${HARNESS_PARENT_UNIQUE_ID:-}"
-export HARNESS_BUILD_ID="${HARNESS_BUILD_ID:-test-build-$(date +%s)}"
-export HARNESS_EXECUTION_ID="${HARNESS_EXECUTION_ID:-test-exec-$(date +%s)}"
 export CI_REPO_LINK="${CI_REPO_LINK:-https://github.com/harness-community/integration-tests-maven.git}"
 
 # --- run integration tests via hcli, agent attached to the test JVM via argLine ---
