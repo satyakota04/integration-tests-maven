@@ -20,9 +20,21 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # --- Ensure required system libs for the native TI agent (.NET NativeAOT) ---
-if command -v apt-get >/dev/null 2>&1 && ! ldconfig -p 2>/dev/null | grep -q libicu; then
-  echo "Installing libicu (required by native TI agent)..."
-  apt-get update -qq && apt-get install -y -qq libicu > /dev/null 2>&1 || true
+if ! ldconfig -p 2>/dev/null | grep -q libicu; then
+  echo "libicu not found — installing (required by native TI agent)..."
+  if command -v apt-get >/dev/null 2>&1; then
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update -qq || true
+    # Try the most common package names across Debian/Ubuntu releases
+    apt-get install -y libicu-dev 2>/dev/null \
+      || apt-get install -y libicu72 2>/dev/null \
+      || apt-get install -y libicu74 2>/dev/null \
+      || apt-get install -y libicu 2>/dev/null \
+      || echo "WARNING: Could not install libicu via apt-get. Native agent may crash." >&2
+  else
+    echo "WARNING: No apt-get available to install libicu. Native agent may crash." >&2
+  fi
+  echo "libicu install check: $(ldconfig -p 2>/dev/null | grep -c libicu) libraries found"
 fi
 
 # --- Ensure binaries are executable ---
