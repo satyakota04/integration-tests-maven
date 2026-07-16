@@ -20,6 +20,22 @@ echo "========================================"
 echo "CI hcli integration tests (QA agents)"
 echo "========================================"
 
+# --- libicu required by native TI agent (NativeAOT / ti-agent.so) ---
+if ! ldconfig -p 2>/dev/null | grep -q libicu; then
+  echo "libicu not found — installing (required by native TI agent)..."
+  if command -v apt-get >/dev/null 2>&1; then
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update -qq || true
+    apt-get install -y libicu-dev 2>/dev/null \
+      || apt-get install -y libicu72 2>/dev/null \
+      || apt-get install -y libicu74 2>/dev/null \
+      || apt-get install -y libicu 2>/dev/null \
+      || echo "WARNING: Could not install libicu via apt-get. Native agent may crash." >&2
+  else
+    echo "WARNING: No apt-get available to install libicu. Native agent may crash." >&2
+  fi
+fi
+
 # --- hcli (committed linux binary, PATH, or HCLI_BIN override) ---
 if [[ -z "${HCLI_BIN:-}" ]]; then
   if [[ -x "$SCRIPT_DIR/bin/hcli-linux" ]]; then
