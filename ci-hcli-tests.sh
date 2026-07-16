@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
-# CI-side runner: plain hcli htx + mvn test against ngrok-tunneled services.
-# With CI_ENABLE_HCLI_FOR_INTEGRATION_TESTS, hcli downloads Unified (trampoline +
-# ti-agent.so) for --language=java and attaches it automatically.
+# CI-side runner: plain hcli htx -- mvn test (no hcli flags).
+# IT env vars make hcli download/wire QA Unified agents automatically.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -56,14 +55,12 @@ EOF
 
 export CI_ENABLE_HCLI_FOR_INTEGRATION_TESTS=true
 export HARNESS_TI_QA_ENV=QA_ENV_ENABLED
+export HARNESS_TI_SERVICES_FILE="$TI_DATA_DIR/services.yaml"
 
 cd "$SCRIPT_DIR"
 
 TEST_EXIT=0
-"$HCLI_BIN" htx \
-  --services-file="$TI_DATA_DIR/services.yaml" \
-  --language=java \
-  -- mvn -f integration-tests/pom.xml test \
+"$HCLI_BIN" htx -- mvn -f integration-tests/pom.xml test \
      -Dorder.service.url="$ORDER_SERVICE_URL" \
      -Dinventory.service.url="$INVENTORY_SERVICE_URL" \
      -Dshipping.service.url="$SHIPPING_SERVICE_URL" \
