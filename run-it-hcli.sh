@@ -43,15 +43,16 @@ EOF
 echo "services.yaml: $TI_DATA_DIR/services.yaml"
 echo ""
 
+# No --language: download Unified zip; FF wires Java trampoline into JAVA_TOOL_OPTIONS.
 export CI_ENABLE_HCLI_FOR_INTEGRATION_TESTS=true
 export HARNESS_TI_QA_ENV=QA_ENV_ENABLED
+export CI_ENABLE_RUNTESTV2_JAVA_V2_FF=true
 
 cd "$SCRIPT_DIR"
 
 TEST_EXIT=0
 "$HCLI_BIN" htx \
   --services-file="$TI_DATA_DIR/services.yaml" \
-  --language=java \
   -- mvn -f integration-tests/pom.xml test \
      -Dorder.service.url="$ORDER_SERVICE_URL" \
      -Dinventory.service.url="$INVENTORY_SERVICE_URL" \

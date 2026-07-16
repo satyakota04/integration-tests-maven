@@ -48,7 +48,7 @@ TI_DATA_DIR="${TI_DATA_DIR:-$SCRIPT_DIR/ti-it}"
 mkdir -p "$TI_DATA_DIR"
 
 echo "hcli:         $HCLI_BIN"
-echo "Agent source: QA (HARNESS_TI_QA_ENV=QA_ENV_ENABLED)"
+echo "Agent source: QA (HARNESS_TI_QA_ENV=QA_ENV_ENABLED, CI_ENABLE_RUNTESTV2_JAVA_V2_FF=true)"
 echo ""
 
 # --- services.yaml for hcli (hostnames only — hcli hardcodes http:// prefix) ---
@@ -62,17 +62,17 @@ echo "services.yaml: $TI_DATA_DIR/services.yaml"
 echo ""
 
 # Pipeline supplies HARNESS_* (incl. HARNESS_PIPELINE_ID → --setup-agents).
+# No --language: download all agents incl. Unified (dotnet QA zip with trampoline + ti-agent.so).
+# CI_ENABLE_RUNTESTV2_JAVA_V2_FF: Unified wires JAVA_TOOL_OPTIONS to the trampoline.
 export CI_ENABLE_HCLI_FOR_INTEGRATION_TESTS=true
 export HARNESS_TI_QA_ENV=QA_ENV_ENABLED
+export CI_ENABLE_RUNTESTV2_JAVA_V2_FF=true
 
 cd "$SCRIPT_DIR"
 
-# No --disable-agents: hcli downloads the QA jar and sets JAVA_TOOL_OPTIONS.
-# No -DargLine / local trampoline / native .so: released agent path only.
 TEST_EXIT=0
 "$HCLI_BIN" htx \
   --services-file="$TI_DATA_DIR/services.yaml" \
-  --language=java \
   -- mvn -f integration-tests/pom.xml test \
      -Dorder.service.url="$ORDER_SERVICE_URL" \
      -Dinventory.service.url="$INVENTORY_SERVICE_URL" \
